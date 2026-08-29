@@ -6,6 +6,7 @@ import pool from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import farmRoutes from "./routes/farmRoutes.js";
 import fieldRoutes from "./routes/fieldRoutes.js";
+import inputRoutes from "./routes/inputRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -16,7 +17,7 @@ app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/farms", farmRoutes);
-app.use("/api/farms/:farmId/fields", fieldRoutes);
+
 app.get("/", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
