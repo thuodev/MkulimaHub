@@ -33,3 +33,16 @@ export const requireFarmMembership = (allowedRoles = null) => {
     }
   };
 };
+export const requireRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.farmRole) {
+      return res.status(403).json({ error: "Farm membership not verified" });
+    }
+    if (!allowedRoles.includes(req.farmRole)) {
+      return res.status(403).json({
+        error: `Requires one of these roles: ${allowedRoles.join(", ")}`,
+      });
+    }
+    next();
+  };
+};
