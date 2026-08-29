@@ -4,6 +4,7 @@ import { createFarm, listFarms } from "../controllers/farmController.js";
 import fieldRoutes from "./fieldRoutes.js";
 import inputRoutes from "./inputRoutes.js";
 import stockRoutes from "./stockRoutes.js";
+import livestockRoutes from "./livestockRoutes.js";
 const router = express.Router();
 
 router.use(requireAuth);
@@ -14,4 +15,5 @@ router.get("/", listFarms);
 router.use("/:farmId/fields", fieldRoutes);
 router.use("/:farmId/inputs", inputRoutes);
 router.use("/:farmId/stock", stockRoutes);
+router.use("/:farmId/livestock", livestockRoutes);
 export default router;
