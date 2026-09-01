@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import farmRoutes from "./routes/farmRoutes.js";
 import fieldRoutes from "./routes/fieldRoutes.js";
 import inputRoutes from "./routes/inputRoutes.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 dotenv.config();
 
 const app = express();
@@ -17,6 +18,8 @@ app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/farms", farmRoutes);
+
+app.use(errorHandler);
 
 app.get("/", async (req, res) => {
   try {
