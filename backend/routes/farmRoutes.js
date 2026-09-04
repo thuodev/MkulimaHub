@@ -4,6 +4,11 @@ import {
   requireFarmMembership,
   requireRole,
 } from "../middleware/farmAuthMiddleware.js";
+import { validate } from "../middleware/validate.js";
+import {
+  createFarmSchema,
+  addMemberSchema,
+} from "../validators/farmValidator.js";
 import {
   createFarm,
   listFarms,
@@ -22,7 +27,7 @@ const router = express.Router();
 
 router.use(requireAuth);
 
-router.post("/", createFarm);
+router.post("/", validate(createFarmSchema), createFarm);
 router.get("/", listFarms);
 
 router.get("/:farmId/members", requireFarmMembership(), getMembers);
@@ -30,6 +35,7 @@ router.post(
   "/:farmId/members",
   requireFarmMembership(),
   requireRole(["owner"]),
+  validate(addMemberSchema),
   addMember,
 );
 router.delete(

@@ -4,6 +4,11 @@ import {
   requireFarmMembership,
   requireRole,
 } from "../middleware/farmAuthMiddleware.js";
+import { validate } from "../middleware/validate.js";
+import {
+  createInputSchema,
+  createTransactionSchema,
+} from "../validators/inputValidator.js";
 import {
   addInput,
   listInputs,
@@ -19,7 +24,17 @@ router.use(requireFarmMembership());
 
 router.get("/categories", listCategories);
 router.get("/", listInputs);
-router.post("/", requireRole(["owner", "manager"]), addInput);
-router.post("/:inputId/transactions", addTransaction);
+router.post(
+  "/",
+  requireRole(["owner", "manager"]),
+  validate(createInputSchema),
+  addInput,
+);
+router.post(
+  "/:inputId/transactions",
+  validate(createTransactionSchema),
+  addTransaction,
+);
 router.get("/:inputId/transactions", listTransactions);
+
 export default router;

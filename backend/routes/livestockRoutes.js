@@ -4,6 +4,11 @@ import {
   requireFarmMembership,
   requireRole,
 } from "../middleware/farmAuthMiddleware.js";
+import { validate } from "../middleware/validate.js";
+import {
+  createLivestockSchema,
+  createEventSchema,
+} from "../validators/livestockValidator.js";
 import {
   addLivestock,
   listLivestock,
@@ -19,8 +24,13 @@ router.use(requireFarmMembership());
 
 router.get("/", listLivestock);
 router.get("/:recordId", getLivestock);
-router.post("/", requireRole(["owner", "manager"]), addLivestock);
-router.post("/:recordId/events", addEvent);
+router.post(
+  "/",
+  requireRole(["owner", "manager"]),
+  validate(createLivestockSchema),
+  addLivestock,
+);
+router.post("/:recordId/events", validate(createEventSchema), addEvent);
 router.get("/:recordId/events", listEvents);
 
 export default router;

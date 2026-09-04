@@ -4,6 +4,11 @@ import {
   requireFarmMembership,
   requireRole,
 } from "../middleware/farmAuthMiddleware.js";
+import { validate } from "../middleware/validate.js";
+import {
+  createStockItemSchema,
+  createMovementSchema,
+} from "../validators/stockValidator.js";
 import {
   addStockItem,
   listStockItems,
@@ -17,7 +22,17 @@ router.use(requireAuth);
 router.use(requireFarmMembership());
 
 router.get("/", listStockItems);
-router.post("/", requireRole(["owner", "manager"]), addStockItem);
-router.post("/:stockItemId/movements", addMovement);
+router.post(
+  "/",
+  requireRole(["owner", "manager"]),
+  validate(createStockItemSchema),
+  addStockItem,
+);
+router.post(
+  "/:stockItemId/movements",
+  validate(createMovementSchema),
+  addMovement,
+);
 router.get("/:stockItemId/movements", listMovements);
+
 export default router;
