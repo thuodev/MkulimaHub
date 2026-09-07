@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const client = axios.create({
-  baseURL: "https://mkulimahub-b53g.onrender.com",
+  baseURL: "https://mkulimahub-b53g.onrender.com/api", // Replace with your backend API URL
 });
 
 client.interceptors.request.use((config) => {
