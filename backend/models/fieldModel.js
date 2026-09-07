@@ -16,12 +16,32 @@ export const createField = async (
   return result.rows[0];
 };
 
-export const getFieldsForFarm = async (farmId) => {
-  const result = await pool.query(
-    `SELECT * FROM fields WHERE farm_id = $1 ORDER BY created_at DESC`,
-    [farmId],
+export const getFieldsForFarm = async (farmId, { limit, offset, crop }) => {
+  const conditions = ["farm_id = $1"];
+  const params = [farmId];
+
+  if (crop) {
+    params.push(crop);
+    conditions.push(`current_crop = $${params.length}`);
+  }
+  const whereClause = conditions.join(" AND ");
+
+  const countResult = await pool.query(
+    `SELECT COUNT(*) FROM fields WHERE ${whereClause}`,
+    params,
   );
-  return result.rows;
+  params.push(limit, offset);
+
+  const rowsResult = await pool.query(
+    `SELECT * FROM fields WHERE ${whereClause}
+    ORDER BY created_at DESC
+    LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params,
+  );
+  return {
+    rows: rowsResult.rows,
+    totalCount: Number(countResult.rows[0].count),
+  };
 };
 
 export const getFieldById = async (farmId, fieldId) => {

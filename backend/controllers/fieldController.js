@@ -6,6 +6,7 @@ import {
   deleteField,
 } from "../models/fieldModel.js";
 import { asyncHandler, AppError } from "../middleware/errorHandler.js";
+import { getPagination, buildPaginatedResponse } from "../utils/pagination.js";
 
 export const addField = asyncHandler(async (req, res) => {
   const { name, size, sizeUnit, currentCrop } = req.body;
@@ -23,8 +24,15 @@ export const addField = asyncHandler(async (req, res) => {
 });
 
 export const listFields = asyncHandler(async (req, res) => {
-  const fields = await getFieldsForFarm(req.params.farmId);
-  res.json(fields);
+  const { limit, offset, page } = getPagination(req.query);
+  const { crop } = req.query;
+
+  const { rows, totalCount } = await getFieldsForFarm(req.params.farmId, {
+    limit,
+    offset,
+    crop,
+  });
+  res.json(buildPaginatedResponse(rows, totalCount, page, limit));
 });
 
 export const getField = asyncHandler(async (req, res) => {

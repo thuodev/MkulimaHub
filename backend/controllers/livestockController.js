@@ -9,6 +9,7 @@ import {
   getEventsForRecord,
 } from "../models/livestockEventModel.js";
 import { asyncHandler, AppError } from "../middleware/errorHandler.js";
+import { getPagination, buildPaginatedResponse } from "../utils/pagination.js";
 
 export const addLivestock = asyncHandler(async (req, res) => {
   const { fieldId, type, species, tagId, birthDate, sex, quantity } = req.body;
@@ -36,8 +37,16 @@ export const addLivestock = asyncHandler(async (req, res) => {
 });
 
 export const listLivestock = asyncHandler(async (req, res) => {
-  const records = await getLivestockForFarm(req.params.farmId);
-  res.json(records);
+  const { limit, offset, page } = getPagination(req.query);
+  const { species, type } = req.query;
+
+  const { rows, totalCount } = await getLivestockForFarm(req.params.farmId, {
+    limit,
+    offset,
+    species,
+    type,
+  });
+  res.json(buildPaginatedResponse(rows, totalCount, page, limit));
 });
 
 export const getLivestock = asyncHandler(async (req, res) => {

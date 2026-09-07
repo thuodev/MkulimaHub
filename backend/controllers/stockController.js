@@ -5,6 +5,7 @@ import {
   getStockBalance,
 } from "../models/stockMovementModel.js";
 import { asyncHandler, AppError } from "../middleware/errorHandler.js";
+import { getPagination, buildPaginatedResponse } from "../utils/pagination.js";
 
 export const addStockItem = asyncHandler(async (req, res) => {
   const { name, category, unitOfMeasure } = req.body;
@@ -21,8 +22,15 @@ export const addStockItem = asyncHandler(async (req, res) => {
 });
 
 export const listStockItems = asyncHandler(async (req, res) => {
-  const items = await getStockItemsForFarm(req.params.farmId);
-  res.json(items);
+  const { limit, offset, page } = getPagination(req.query);
+  const { category } = req.query;
+
+  const { rows, totalCount } = await getStockItemsForFarm(req.params.farmId, {
+    limit,
+    offset,
+    category,
+  });
+  res.json(buildPaginatedResponse(rows, totalCount, page, limit));
 });
 
 export const addMovement = asyncHandler(async (req, res) => {

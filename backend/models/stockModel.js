@@ -15,10 +15,33 @@ export const createStockItem = async (
   return result.rows[0];
 };
 
-export const getStockItemsForFarm = async (farmId) => {
-  const result = await pool.query(
-    `SELECT * FROM stock_items WHERE farm_id = $1 ORDER BY created_at DESC`,
-    [farmId],
+export const getStockItemsForFarm = async (
+  farmId,
+  { limit, offset, category },
+) => {
+  const conditions = ["farm_id = $1"];
+  const params = [farmId];
+
+  if (category) {
+    params.push(category);
+    conditions.push(`category = $${params.length}`);
+  }
+  const whereClause = conditions.join(" AND ");
+  const countResult = await pool.query(
+    `SELECT COUNT(*) FROM stock_items WHERE ${whereClause}`,
+    params,
   );
-  return result.rows;
+
+  params.push(limit, offset);
+  const rowResult = await pool.query(
+    `SELECT * FROM stock_items WHERE ${whereClause}
+     ORDER BY created_at DESC
+     LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params,
+  );
+
+  return {
+    rows: rowResult.rows,
+    totalCount: Number(countResult.rows[0].count),
+  };
 };

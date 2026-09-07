@@ -10,16 +10,35 @@ export const createInput = async (farmId, categoryId, name, unitOfMeasure) => {
   return result.rows[0];
 };
 
-export const getInputsForFarm = async (farmId) => {
-  const result = await pool.query(
-    `SELECT i.*, ic.name AS category_name
-     FROM inputs i
-     LEFT JOIN input_categories ic ON ic.id = i.category_id
-     WHERE i.farm_id = $1
-     ORDER BY i.created_at DESC`,
-    [farmId],
+export const getInputsForFarm = async (
+  farmId,
+  { limit, offset, categoryId },
+) => {
+  const conditions = ["farm_id = $1"];
+  const params = [farmId];
+
+  if (categoryId) {
+    params.push(categoryId);
+    conditions.push(`category_id = $${params.length}`);
+  }
+
+  const whereClause = conditions.join(" AND ");
+
+  const countResult = await pool.query(
+    `SELECT COUNT(*) FROM inputs WHERE ${whereClause}`,
+    params,
   );
-  return result.rows;
+  params.push(limit, offset);
+  const rowResult = await pool.query(
+    `SELECT * FROM inputs WHERE ${whereClause}
+     ORDER BY created_at DESC
+     LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params,
+  );
+  return {
+    rows: rowResult.rows,
+    totalCount: Number(countResult.rows[0].count),
+  };
 };
 
 export const getInputById = async (farmId, inputId) => {

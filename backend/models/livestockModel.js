@@ -20,12 +20,41 @@ export const createLivestockRecord = async (farmId, data) => {
   return result.rows[0];
 };
 
-export const getLivestockForFarm = async (farmId) => {
-  const result = await pool.query(
-    `SELECT * FROM livestock_records WHERE farm_id = $1 ORDER BY created_at DESC`,
-    [farmId],
+export const getLivestockForFarm = async (
+  farmId,
+  { limit, offset, species, type },
+) => {
+  const conditions = ["farm_id = $1"];
+  const params = [farmId];
+
+  if (species || type) {
+    if (species) {
+      params.push(species);
+      conditions.push(`species = $${params.length}`);
+    }
+    if (type) {
+      params.push(type);
+      conditions.push(`type = $${params.length}`);
+    }
+  }
+
+  const whereClause = conditions.join(" AND ");
+
+  const countResult = await pool.query(
+    `SELECT COUNT(*) FROM livestock_records WHERE ${whereClause}`,
+    params,
   );
-  return result.rows;
+  params.push(limit, offset);
+  const rowResult = await pool.query(
+    `SELECT * FROM livestock_records WHERE ${whereClause}
+     ORDER BY created_at DESC
+     LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params,
+  );
+  return {
+    rows: rowResult.rows,
+    totalCount: Number(countResult.rows[0].count),
+  };
 };
 
 export const getLivestockById = async (farmId, recordId) => {

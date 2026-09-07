@@ -9,6 +9,7 @@ import {
   getInputBalance,
 } from "../models/inputTransactionModel.js";
 import { asyncHandler, AppError } from "../middleware/errorHandler.js";
+import { getPagination, buildPaginatedResponse } from "../utils/pagination.js";
 
 export const addInput = asyncHandler(async (req, res) => {
   const { categoryId, name, unitOfMeasure } = req.body;
@@ -25,8 +26,15 @@ export const addInput = asyncHandler(async (req, res) => {
 });
 
 export const listInputs = asyncHandler(async (req, res) => {
-  const inputs = await getInputsForFarm(req.params.farmId);
-  res.json(inputs);
+  const { limit, offset, page } = getPagination(req.query);
+  const { categoryId } = req.query;
+
+  const { rows, totalCount } = await getInputsForFarm(req.params.farmId, {
+    limit,
+    offset,
+    categoryId,
+  });
+  res.json(buildPaginatedResponse(rows, totalCount, page, limit));
 });
 
 export const listCategories = asyncHandler(async (req, res) => {
