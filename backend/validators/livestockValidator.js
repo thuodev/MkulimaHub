@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const createLivestockSchema = Joi.object({
-  fieldId: Joi.number().integer().allow(null),
+  fieldId: Joi.string().guid().allow(null),
   type: Joi.string().valid("individual", "batch").required(),
   species: Joi.string().min(1).max(50).required(),
   tagId: Joi.string().max(50).allow("", null),
