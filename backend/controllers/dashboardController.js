@@ -1,8 +1,15 @@
 import pool from "../config/db.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
+import { getCache, setCache } from "../utils/cache.js";
 
 export const getFarmSummary = asyncHandler(async (req, res) => {
   const farmId = req.params.farmId;
+  const cacheKey = `dashboard:${farmId}`;
+
+  const cached = await getCache(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
 
   const fieldsResult = await pool.query(
     `SELECT COUNT(*) AS field_count, COALESCE(SUM(size), 0) AS total_field_size
@@ -53,7 +60,7 @@ export const getFarmSummary = asyncHandler(async (req, res) => {
       (livestockBySpecies[row.species] || 0) + Number(row.current_quantity);
   }
 
-  res.json({
+  const summary = {
     fields: {
       count: Number(fieldsResult.rows[0].field_count),
       totalSize: Number(fieldsResult.rows[0].total_field_size),
@@ -70,5 +77,9 @@ export const getFarmSummary = asyncHandler(async (req, res) => {
       totalRecords: livestockResult.rows.length,
       bySpecies: livestockBySpecies,
     },
-  });
+  };
+  console.log("CACHE SET:", cacheKey);
+
+  await setCache(cacheKey, summary, 60);
+  res.json(summary);
 });

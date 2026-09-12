@@ -8,6 +8,7 @@ import {
   deleteFarm,
 } from "../models/farmModel.js";
 import { asyncHandler, AppError } from "../middleware/errorHandler.js";
+import { getCache, setCache, deleteCache } from "../utils/cache.js";
 
 export const createFarm = asyncHandler(async (req, res) => {
   const { name, location, totalSize, sizeUnit } = req.body;
@@ -21,11 +22,19 @@ export const createFarm = asyncHandler(async (req, res) => {
     totalSize,
     sizeUnit,
   );
+  await deleteCache(`farms:${req.userId}`); // Invalidate cache for the user's farms
   res.status(201).json(farm);
 });
 
 export const listFarms = asyncHandler(async (req, res) => {
+  const cacheKey = `farms:${req.userId}`;
+  const cached = await getCache(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
+  console.log("CACHE MISS:", cacheKey);
   const farms = await getFarmsForUser(req.userId);
+  await setCache(cacheKey, farms, 300); // 5 minutes
   res.json(farms);
 });
 
@@ -47,6 +56,7 @@ export const addMember = asyncHandler(async (req, res) => {
   }
 
   const membership = await addFarmMember(req.params.farmId, user.id, role);
+  await deleteCache(`farms:${req.userId}`); // Invalidate cache for the newly added member's farms
   res.status(201).json({ ...membership, name: user.name, email: user.email });
 });
 
@@ -58,6 +68,7 @@ export const getMembers = asyncHandler(async (req, res) => {
 export const removeMember = asyncHandler(async (req, res) => {
   const removed = await removeFarmMember(req.params.farmId, req.params.userId);
   if (!removed) throw new AppError("Member not found on this farm", 404);
+  await deleteCache(`farms:${req.userId}`); // Invalidate cache for the removed member's farms
   res.status(204).send();
 });
 
