@@ -9,6 +9,45 @@ import {
 } from "../models/farmModel.js";
 import { asyncHandler, AppError } from "../middleware/errorHandler.js";
 import { getCache, setCache, deleteCache } from "../utils/cache.js";
+import bcrypt from "bcrypt";
+import { createUser } from "../models/userModel.js";
+import { generateTempPassword } from "../utils/generatePassword.js";
+import { sendEmployeeCredentialsEmail } from "../utils/mailer.js";
+
+export const createEmployee = asyncHandler(async (req, res) => {
+  const { name, email, role } = req.body;
+
+  if (!name || !email || !role) {
+    throw new AppError("name, email and role are required", 400);
+  }
+  if (!["manager", "worker"].includes(role)) {
+    throw new AppError("role must be manager or worker", 400); // Only allow creating employees with role manager or worker
+  }
+  const existing = await findUserByEmail(email);
+  if (existing) {
+    throw new AppError(
+      'A user with that email already exists — use "Add existing member" instead',
+      409,
+    );
+  }
+  const tempPassword = generateTempPassword();
+  const passwordHash = await bcrypt.hash(tempPassword, 10);
+  const user = await createUser(name, email, passwordHash);
+  const membership = await addFarmMember(req.params.farmId, user.id, role);
+
+  // fetch farm name for the email
+  const farms = await getFarmsForUser(req.userId);
+  const farm = farms.find((f) => f.id === req.params.farmId);
+
+  await sendEmployeeCredentialsEmail(
+    email,
+    name,
+    farm?.name || "your farm",
+    tempPassword,
+  );
+  await deleteCache(`farms:${req.userId}`); // Invalidate cache for the newly created employee's farms
+  res.status(201).json({ ...membership, name: user.name, email: user.email });
+});
 
 export const createFarm = asyncHandler(async (req, res) => {
   const { name, location, totalSize, sizeUnit } = req.body;

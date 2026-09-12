@@ -11,3 +11,9 @@ export const addMemberSchema = Joi.object({
   email: Joi.string().email().required(),
   role: Joi.string().valid("owner", "manager", "worker").required(),
 });
+
+export const createEmployeeSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required(),
+  email: Joi.string().email().required(),
+  role: Joi.string().valid("manager", "worker").required(),
+});

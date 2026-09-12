@@ -22,6 +22,8 @@ import inputRoutes from "./inputRoutes.js";
 import stockRoutes from "./stockRoutes.js";
 import livestockRoutes from "./livestockRoutes.js";
 import dashboardRoutes from "./dashboardRoutes.js";
+import { createEmployee } from "../controllers/farmController.js";
+import { createEmployeeSchema } from "../validators/farmValidator.js";
 
 const router = express.Router();
 
@@ -51,6 +53,13 @@ router.delete(
   removeFarm,
 );
 
+router.post(
+  "/:farmId/employees",
+  requireFarmMembership(),
+  requireRole(["owner"]),
+  validate(createEmployeeSchema),
+  createEmployee,
+);
 router.use("/:farmId/fields", fieldRoutes);
 router.use("/:farmId/inputs", inputRoutes);
 router.use("/:farmId/stock", stockRoutes);

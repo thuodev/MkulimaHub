@@ -17,13 +17,14 @@ export const sendEmployeeCredentialsEmail = async (
   farmName,
   tempPassword,
 ) => {
-  const loginUrl = process.env.FRONTENDURL || "http:localhost:5173";
+  const loginUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
   await transporter.sendMail({
-    from: `"MkulimaHub" <{process.env.GMAIL_USER}>`,
+    from: `"MkulimaHub" <${process.env.GMAIL_USER}>`,
     to: toEmail,
-    subject: `You've been added to ${farmname} on MkulimaHub`,
+    subject: `You've been added to ${farmName} on MkulimaHub`,
     html: `
-    <p>Hi ${name},</p>
+      <p>Hi ${name},</p>
       <p>You've been added as a member of <strong>${farmName}</strong> on MkulimaHub.</p>
       <p>Your login details:</p>
       <ul>
@@ -31,7 +32,6 @@ export const sendEmployeeCredentialsEmail = async (
         <li><strong>Temporary password:</strong> ${tempPassword}</li>
       </ul>
       <p>Log in at <a href="${loginUrl}/login">${loginUrl}/login</a> and change your password once you're in.</p>
-      
     `,
   });
 };
