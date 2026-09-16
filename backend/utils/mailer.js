@@ -35,3 +35,20 @@ export const sendEmployeeCredentialsEmail = async (
     `,
   });
 };
+
+export const sendPasswordResetEmail = async (toEmail, name, resetToken) => {
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+  await transporter.sendMail({
+    from: `"MkulimaHub" <${process.env.GMAIL_USER}>`,
+    to: toEmail,
+    subject: "Reset your MkulimaHub password",
+    html: `
+      <p>Hi ${name},</p>
+      <p>Someone requested a password reset for your MkulimaHub account. If this was you, click the link below — it expires in 1 hour:</p>
+      <p><a href="${resetUrl}">${resetUrl}</a></p>
+      <p>If you didn't request this, you can safely ignore this email.</p>
+    `,
+  });
+};

@@ -10,7 +10,9 @@ import Fields from "./pages/Fields";
 import Inputs from "./pages/Inputs";
 import Stock from "./pages/Stock";
 import Livestock from "./pages/Livestock";
-
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import Team from "./pages/Team";
 function App() {
   return (
     <AuthProvider>
@@ -77,6 +79,18 @@ function App() {
             }
           />
           <Route path="/" element={<Navigate to="/farms" replace />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route
+            path="/team"
+            element={
+              <ProtectedRoute>
+                <RequireFarm>
+                  <Team />
+                </RequireFarm>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

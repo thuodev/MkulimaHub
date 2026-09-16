@@ -2,10 +2,10 @@ import pool from "../config/db.js";
 
 export const createUser = async (name, email, passwordHash) => {
   const result = await pool.query(
-    `INSERT INTO users (name, email, password_hash)
-     VALUES ($1, $2, $3)
-     RETURNING id, name, email, created_at`,
-    [name, email, passwordHash],
+    `INSERT INTO users (name, email, password_hash, account_type)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, name, email,account_type, created_at`,
+    [name, email, passwordHash, account_type],
   );
   return result.rows[0];
 };
@@ -15,4 +15,16 @@ export const findUserByEmail = async (email) => {
     email,
   ]);
   return result.rows[0];
+};
+
+export const findUserById = async (id) => {
+  const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
+  return result.rows[0];
+};
+
+export const updateUserPassword = async (userId, passwordHash) => {
+  await pool.query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [
+    passwordHash,
+    userId,
+  ]);
 };

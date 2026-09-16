@@ -34,6 +34,7 @@ const Dashboard = () => {
         <Link to="/fields">Fields</Link> | <Link to="/inputs">Inputs</Link> |{" "}
         <Link to="/stock">Stock</Link> | <Link to="/livestock">Livestock</Link>{" "}
         | <Link to="/farms">Switch Farm</Link>
+        <Link to="/team">Team</Link>
       </nav>
       <button onClick={logout}>Logout</button>
 

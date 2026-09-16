@@ -1,4 +1,8 @@
-import { findUserByEmail } from "../models/userModel.js";
+import {
+  findUserByEmail,
+  findUserById,
+  createUser,
+} from "../models/userModel.js";
 import {
   createFarmWithOwner,
   getFarmsForUser,
@@ -10,7 +14,7 @@ import {
 import { asyncHandler, AppError } from "../middleware/errorHandler.js";
 import { getCache, setCache, deleteCache } from "../utils/cache.js";
 import bcrypt from "bcrypt";
-import { createUser } from "../models/userModel.js";
+
 import { generateTempPassword } from "../utils/generatePassword.js";
 import { sendEmployeeCredentialsEmail } from "../utils/mailer.js";
 
@@ -32,7 +36,7 @@ export const createEmployee = asyncHandler(async (req, res) => {
   }
   const tempPassword = generateTempPassword();
   const passwordHash = await bcrypt.hash(tempPassword, 10);
-  const user = await createUser(name, email, passwordHash);
+  const user = await createUser(name, email, passwordHash, "invited");
   const membership = await addFarmMember(req.params.farmId, user.id, role);
 
   // fetch farm name for the email
@@ -50,6 +54,11 @@ export const createEmployee = asyncHandler(async (req, res) => {
 });
 
 export const createFarm = asyncHandler(async (req, res) => {
+  const user = await findUserById(req.userId);
+
+  if (user.account_type === "invited") {
+    throw new AppError("Employee accounts cannot create their own farms", 403);
+  }
   const { name, location, totalSize, sizeUnit } = req.body;
   if (!name) {
     throw new AppError("name is required", 400);
