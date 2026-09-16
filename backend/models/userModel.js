@@ -1,11 +1,16 @@
 import pool from "../config/db.js";
 
-export const createUser = async (name, email, passwordHash) => {
+export const createUser = async (
+  name,
+  email,
+  passwordHash,
+  accountType = "self_registered",
+) => {
   const result = await pool.query(
     `INSERT INTO users (name, email, password_hash, account_type)
      VALUES ($1, $2, $3, $4)
-     RETURNING id, name, email,account_type, created_at`,
-    [name, email, passwordHash, account_type],
+     RETURNING id, name, email, account_type, created_at`,
+    [name, email, passwordHash, accountType],
   );
   return result.rows[0];
 };
