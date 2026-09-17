@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.GMAIL_APP_PASSWORD,
   },
   family: 4, // Use IPv4
-  connectTimeout: 1000, // 10 seconds
+  connectTimeout: 10000, // 10 seconds
 });
 
 export const sendEmployeeCredentialsEmail = async (
