@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getDashboard } from "../api/dashboard";
+import { NavLink } from "react-router-dom";
 
 const Dashboard = () => {
   const { selectedFarm, user, logout } = useAuth();
@@ -31,10 +32,12 @@ const Dashboard = () => {
         Logged in as {user.name} — role: {selectedFarm.role}
       </p>
       <nav>
-        <Link to="/fields">Fields</Link> | <Link to="/inputs">Inputs</Link> |{" "}
-        <Link to="/stock">Stock</Link> | <Link to="/livestock">Livestock</Link>{" "}
-        | <Link to="/farms">Switch Farm</Link>
-        <Link to="/team">Team</Link>
+        <NavLink to="/fields">Fields</NavLink>
+        <NavLink to="/inputs">Inputs</NavLink>
+        <NavLink to="/stock">Stock</NavLink>
+        <NavLink to="/livestock">Livestock</NavLink>
+        <NavLink to="/team">Team</NavLink>
+        <NavLink to="/farms">Switch Farm</NavLink>
       </nav>
       <button onClick={logout}>Logout</button>
 
